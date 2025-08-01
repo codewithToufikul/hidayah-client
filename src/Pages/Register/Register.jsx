@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../Hooks/axiosIntance';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -314,9 +314,9 @@ const Register = () => {
             <div className="text-center space-y-3 pt-4 border-t border-emerald-100">
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
-                <button className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors duration-300">
+                <Link to={"/login"} className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors duration-300">
                   Sign In
-                </button>
+                </Link>
               </p>
               <p className="text-xs text-gray-500 leading-relaxed">
                 By creating an account, you agree to our Terms of Service and Privacy Policy
