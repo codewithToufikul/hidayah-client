@@ -101,7 +101,8 @@ const Home = () => {
   };
 
   const currentDisplayDua = selectedHistoryItem || dua;
-
+  console.log(dua)
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-x-hidden">
       {/* Enhanced Background Pattern */}
@@ -189,6 +190,12 @@ const Home = () => {
                     <p className="text-xs text-gray-600 line-clamp-2">
                       {item.translation}
                     </p>
+                    {/* Show Bengali translation in history if available */}
+                    {item.bnTranslation && (
+                      <p className="text-xs text-blue-600 line-clamp-2 mt-1 italic">
+                        {item.bnTranslation}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -262,6 +269,12 @@ const Home = () => {
                       <p className="text-xs text-gray-600 line-clamp-2">
                         {item.translation}
                       </p>
+                      {/* Show Bengali translation in mobile history if available */}
+                      {item.bnTranslation && (
+                        <p className="text-xs text-blue-600 line-clamp-2 mt-1 italic">
+                          {item.bnTranslation}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -468,24 +481,62 @@ const Home = () => {
                     </div>
                     
                     <div className="space-y-3 sm:space-y-4">
+                      {/* Arabic Text */}
                       <div className="p-3 sm:p-4 bg-white/80 rounded-lg border-r-4 border-emerald-400">
                         <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 text-right leading-relaxed" dir="rtl">
                           {currentDisplayDua.arabic}
                         </p>
                       </div>
                       
-                      <div className="p-3 sm:p-4 bg-teal-50/50 rounded-lg">
+                      {/* English Translation */}
+                      <div className="p-3 sm:p-4 bg-teal-50/50 rounded-lg border-l-4 border-teal-400">
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m0 0v10a2 2 0 002 2h8a2 2 0 002-2V8M9 12h6m-6 4h6" />
+                          </svg>
+                          <span className="text-sm font-medium text-teal-700">English Translation</span>
+                        </div>
                         <p className="text-base sm:text-lg text-gray-700 italic leading-relaxed">
                           "{currentDisplayDua.translation}"
                         </p>
                       </div>
 
-                      {selectedHistoryItem && (
+                      {/* Bengali Translation */}
+                      {currentDisplayDua.bnTranslation && (
+                        <div className="p-3 sm:p-4 bg-blue-50/50 rounded-lg border-l-4 border-blue-400">
+                          <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                            </svg>
+                            <span className="text-sm font-medium text-blue-700">বাংলা অনুবাদ</span>
+                          </div>
+                          <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-medium">
+                            "{currentDisplayDua.bnTranslation}"
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Short Explanation if available */}
+                      {currentDisplayDua.short_explanation && (
                         <div className="p-3 sm:p-4 bg-amber-50/50 rounded-lg border-l-4 border-amber-400">
-                          <p className="text-sm text-amber-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium text-amber-700">ব্যাখ্যা</span>
+                          </div>
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                            {currentDisplayDua.short_explanation}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedHistoryItem && (
+                        <div className="p-3 sm:p-4 bg-gray-50/50 rounded-lg border-l-4 border-gray-400">
+                          <p className="text-sm text-gray-700">
                             <span className="font-medium">Your feeling was:</span> {selectedHistoryItem.emotion}
                           </p>
-                          <p className="text-xs text-amber-600 mt-1">
+                          <p className="text-xs text-gray-600 mt-1">
                             {formatDate(selectedHistoryItem.createdAt)}
                           </p>
                         </div>
