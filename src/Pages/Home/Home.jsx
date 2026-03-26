@@ -190,12 +190,6 @@ const Home = () => {
                     <p className="text-xs text-gray-600 line-clamp-2">
                       {item.translation}
                     </p>
-                    {/* Show Bengali translation in history if available */}
-                    {item.bnTranslation && (
-                      <p className="text-xs text-blue-600 line-clamp-2 mt-1 italic">
-                        {item.bnTranslation}
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
@@ -269,12 +263,6 @@ const Home = () => {
                       <p className="text-xs text-gray-600 line-clamp-2">
                         {item.translation}
                       </p>
-                      {/* Show Bengali translation in mobile history if available */}
-                      {item.bnTranslation && (
-                        <p className="text-xs text-blue-600 line-clamp-2 mt-1 italic">
-                          {item.bnTranslation}
-                        </p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -500,36 +488,6 @@ const Home = () => {
                           "{currentDisplayDua.translation}"
                         </p>
                       </div>
-
-                      {/* Bengali Translation */}
-                      {currentDisplayDua.bnTranslation && (
-                        <div className="p-3 sm:p-4 bg-blue-50/50 rounded-lg border-l-4 border-blue-400">
-                          <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                            </svg>
-                            <span className="text-sm font-medium text-blue-700">বাংলা অনুবাদ</span>
-                          </div>
-                          <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-medium">
-                            "{currentDisplayDua.bnTranslation}"
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Short Explanation if available */}
-                      {currentDisplayDua.short_explanation && (
-                        <div className="p-3 sm:p-4 bg-amber-50/50 rounded-lg border-l-4 border-amber-400">
-                          <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-sm font-medium text-amber-700">ব্যাখ্যা</span>
-                          </div>
-                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                            {currentDisplayDua.short_explanation}
-                          </p>
-                        </div>
-                      )}
 
                       {selectedHistoryItem && (
                         <div className="p-3 sm:p-4 bg-gray-50/50 rounded-lg border-l-4 border-gray-400">
