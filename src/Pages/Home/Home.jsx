@@ -489,6 +489,41 @@ const Home = () => {
                         </p>
                       </div>
 
+                      {/* Scholarly Reason */}
+                      {currentDisplayDua.short_explanation && (
+                        <div className="p-3 sm:p-4 bg-emerald-50/50 rounded-lg border-l-4 border-emerald-400">
+                          <div className="flex items-center gap-2 mb-1">
+                            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium text-emerald-700">Scholarly Insight</span>
+                          </div>
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                            {currentDisplayDua.short_explanation}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Masnoon Dua */}
+                      {currentDisplayDua.masnoon_dua_arabic && (
+                        <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-xl text-white shadow-md">
+                          <div className="flex items-center gap-2 mb-3">
+                            <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-bold uppercase tracking-wider text-emerald-100">Recommended Masnoon Dua</span>
+                          </div>
+                          <p className="text-xl sm:text-2xl font-bold mb-3 text-right leading-loose" dir="rtl">
+                            {currentDisplayDua.masnoon_dua_arabic}
+                          </p>
+                          <div className="pt-3 border-t border-white/20">
+                            <p className="text-sm sm:text-base italic opacity-90">
+                              "{currentDisplayDua.masnoon_dua_english}"
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {selectedHistoryItem && (
                         <div className="p-3 sm:p-4 bg-gray-50/50 rounded-lg border-l-4 border-gray-400">
                           <p className="text-sm text-gray-700">
