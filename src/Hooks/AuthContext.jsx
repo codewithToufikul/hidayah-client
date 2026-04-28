@@ -35,7 +35,21 @@ const login = async (email, password) => {
 };
 
 
-    const logout = () => {
+  const updateProfile = async (name, email) => {
+    try {
+      const res = await axiosInstance.put("/users/profile", { name, email });
+      if (res.data.success) {
+        setUser(res.data.user);
+        toast.success("Profile updated!");
+        return true;
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Update failed");
+      return false;
+    }
+  };
+
+  const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
@@ -51,7 +65,8 @@ const login = async (email, password) => {
 
       try {
         const res = await axiosInstance.get("/users/profile");
-        setUser(res.data.user);
+        // Check if the response has .user or is the user object directly
+        setUser(res.data.user || res.data);
       } catch (error) {
         console.error("Failed to fetch profile", error);
         setUser(null);
@@ -64,7 +79,7 @@ const login = async (email, password) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, userLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, userLoading, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

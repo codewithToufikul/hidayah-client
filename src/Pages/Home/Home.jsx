@@ -12,7 +12,24 @@ const Home = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
   const [showMobileHistory, setShowMobileHistory] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({ name: "", email: "" });
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setProfileFormData({ name: user.name || "", email: user.email || "" });
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setIsUpdatingProfile(true);
+    const success = await updateProfile(profileFormData.name, profileFormData.email);
+    if (success) setShowProfileModal(false);
+    setIsUpdatingProfile(false);
+  };
 
   const handleLogout = () => {
     logout();
@@ -49,12 +66,14 @@ const Home = () => {
     }
   }, [user]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isRetry = false) => {
     if (!feeling.trim()) return;
     setLoading(true);
     setError(null);
-    setDua(null);
-    setSelectedHistoryItem(null);
+    if (!isRetry) {
+      setDua(null);
+      setSelectedHistoryItem(null);
+    }
     
     try {
       const response = await axiosInstance.post("/dua/get-dua", {
@@ -101,7 +120,6 @@ const Home = () => {
   };
 
   const currentDisplayDua = selectedHistoryItem || dua;
-  console.log(dua)
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-x-hidden">
@@ -115,10 +133,49 @@ const Home = () => {
         ></div>
       </div>
 
-      {/* Floating decorative elements */}
-      <div className="absolute top-20 left-4 w-2 h-2 bg-emerald-300 rounded-full opacity-20 animate-pulse"></div>
-      <div className="absolute top-40 right-8 w-3 h-3 bg-teal-400 rounded-full opacity-20 animate-pulse delay-1000"></div>
-      <div className="absolute bottom-40 left-8 w-2 h-2 bg-emerald-400 rounded-full opacity-20 animate-pulse delay-500"></div>
+      {/* Profile Update Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-emerald-100 animate-in fade-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">Update Profile</h3>
+              <button onClick={() => setShowProfileModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={profileFormData.name} 
+                  onChange={(e) => setProfileFormData({...profileFormData, name: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  placeholder="e.g., Aya Abdulmajid"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={profileFormData.email} 
+                  onChange={(e) => setProfileFormData({...profileFormData, email: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={isUpdatingProfile}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50"
+              >
+                {isUpdatingProfile ? "Updating..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Desktop History Sidebar - Fixed Position */}
       {user && (
@@ -136,21 +193,6 @@ const Home = () => {
             scrollbarWidth: 'thin',
             scrollbarColor: '#10b981 transparent'
           }}>
-            <style jsx>{`
-              div::-webkit-scrollbar {
-                width: 6px;
-              }
-              div::-webkit-scrollbar-track {
-                background: transparent;
-              }
-              div::-webkit-scrollbar-thumb {
-                background: #10b981;
-                border-radius: 3px;
-              }
-              div::-webkit-scrollbar-thumb:hover {
-                background: #059669;
-              }
-            `}</style>
             {historyLoading ? (
               <div className="p-6 text-center">
                 <div className="animate-spin w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2"></div>
@@ -279,11 +321,7 @@ const Home = () => {
           <nav className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
             <div className="flex items-center order-1 sm:order-none">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-xl sm:rounded-full flex items-center justify-center mr-2 sm:mr-3 shadow-lg">
-                <svg
-                  className="w-4 h-4 sm:w-6 sm:h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-4 h-4 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -306,10 +344,13 @@ const Home = () => {
               
               {user ? (
                 <div className="flex items-center w-full sm:w-auto gap-2">
-                  <div className="flex items-center justify-center w-full sm:w-auto bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl shadow-lg border border-emerald-100">
-                    <div className="w-7 h-7 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                  <button 
+                    onClick={() => setShowProfileModal(true)}
+                    className="flex items-center justify-center w-full sm:w-auto bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl shadow-lg border border-emerald-100 hover:border-emerald-300 transition-all group"
+                  >
+                    <div className="w-7 h-7 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0 group-hover:scale-110 transition-transform">
                       <span className="text-white text-sm font-bold">
-                        {user.name.charAt(0).toUpperCase()}
+                        {user.name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center min-w-0 flex-1">
@@ -319,7 +360,7 @@ const Home = () => {
                         {user.name}
                       </span>
                     </div>
-                  </div>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="flex-shrink-0 bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 text-red-600 px-3 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md text-sm"
@@ -344,11 +385,7 @@ const Home = () => {
           {/* Enhanced Header */}
           <header className="text-center mb-8 sm:mb-12 px-2">
             <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl sm:rounded-full mb-4 sm:mb-6 shadow-xl transform hover:scale-105 transition-transform duration-300">
-              <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -356,11 +393,11 @@ const Home = () => {
               Hidayah
             </h1>
             <p className="text-sm sm:text-base md:text-lg font-medium text-emerald-700 mb-2 sm:mb-3">
-              Quranic Du'a Generator
+              Personalized Quranic Guidance
             </p>
             <p className="text-sm sm:text-base md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed px-2">
               {user
-                ? `Find peace and guidance through Allah's words, ${user.name}. Share your feelings and receive a relevant Du'a or verse.`
+                ? `Find peace through Allah's words, ${user.name}. Share your heart and receive guidance.`
                 : "Find peace and guidance through Allah's words. Share your feelings and receive a relevant Du'a or verse from the Holy Quran."}
             </p>
           </header>
@@ -370,10 +407,7 @@ const Home = () => {
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-emerald-100/50 p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-500">
               <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <label
-                    htmlFor="feeling"
-                    className="block text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3"
-                  >
+                  <label htmlFor="feeling" className="block text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">
                     How are you feeling today?
                   </label>
                   <div className="relative">
@@ -383,71 +417,46 @@ const Home = () => {
                       value={feeling}
                       onChange={(e) => setFeeling(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="e.g., sad, anxious, grateful, happy, fearful..."
+                      placeholder="e.g., grateful, anxious, happy, tired, seeking peace..."
                       className="w-full px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg border-2 border-emerald-200 rounded-xl sm:rounded-2xl focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 outline-none transition-all duration-300 bg-white/80 placeholder-gray-400 hover:border-emerald-300"
                       disabled={loading}
                     />
                     <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2">
-                      <svg
-                        className="w-5 h-5 text-emerald-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                        />
-                      </svg>
+                      <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading || !feeling.trim()}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl text-base sm:text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl disabled:shadow-md relative overflow-hidden group"
-                >
-                  <span className="relative z-10">
-                    {loading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            fill="none"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          />
-                        </svg>
-                        Getting your Du'a...
-                      </div>
-                    ) : (
-                      "Get Du'a"
-                    )}
-                  </span>
-                  {!loading && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleSubmit(false)}
+                    disabled={loading || !feeling.trim()}
+                    className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl text-base sm:text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {loading ? (
+                        <><svg className="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg> Finding Aya...</>
+                      ) : (
+                        "Get Du'a"
+                      )}
+                    </span>
+                  </button>
+                  
+                  {dua && !loading && (
+                    <button
+                      onClick={() => handleSubmit(true)}
+                      className="p-3 sm:p-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl sm:rounded-2xl border border-emerald-200 transition-all hover:rotate-180 duration-500"
+                      title="See different result"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
                   )}
-                </button>
+                </div>
 
                 {error && (
-                  <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
-                    </div>
+                  <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                    <p className="text-red-700 font-medium text-sm sm:text-base">{error}</p>
                   </div>
                 )}
 
@@ -461,77 +470,47 @@ const Home = () => {
                       <span className="text-sm sm:text-base text-emerald-600 font-medium bg-emerald-100 px-2 py-1 rounded-full">
                         Ayah {currentDisplayDua.ayah_number}
                       </span>
-                      {selectedHistoryItem && (
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-auto">
-                          From History
-                        </span>
-                      )}
                     </div>
                     
-                    <div className="space-y-3 sm:space-y-4">
-                      {/* Arabic Text */}
-                      <div className="p-3 sm:p-4 bg-white/80 rounded-lg border-r-4 border-emerald-400">
-                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 text-right leading-relaxed" dir="rtl">
+                    <div className="space-y-4">
+                      <div className="p-4 bg-white/80 rounded-xl border-r-4 border-emerald-400 shadow-sm">
+                        <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 text-right leading-loose font-arabic" dir="rtl">
                           {currentDisplayDua.arabic}
                         </p>
                       </div>
                       
-                      {/* English Translation */}
-                      <div className="p-3 sm:p-4 bg-teal-50/50 rounded-lg border-l-4 border-teal-400">
-                        <div className="flex items-center gap-2 mb-2">
-                          <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m0 0v10a2 2 0 002 2h8a2 2 0 002-2V8M9 12h6m-6 4h6" />
-                          </svg>
-                          <span className="text-sm font-medium text-teal-700">English Translation</span>
-                        </div>
+                      <div className="p-4 bg-teal-50/50 rounded-xl border-l-4 border-teal-400">
+                        <span className="text-xs font-bold text-teal-700 uppercase tracking-wider mb-1 block">Translation</span>
                         <p className="text-base sm:text-lg text-gray-700 italic leading-relaxed">
                           "{currentDisplayDua.translation}"
                         </p>
                       </div>
 
-                      {/* Scholarly Reason */}
                       {currentDisplayDua.short_explanation && (
-                        <div className="p-3 sm:p-4 bg-emerald-50/50 rounded-lg border-l-4 border-emerald-400">
-                          <div className="flex items-center gap-2 mb-1">
-                            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-sm font-medium text-emerald-700">Scholarly Insight</span>
-                          </div>
+                        <div className="p-4 bg-emerald-50/50 rounded-xl border-l-4 border-emerald-400">
+                          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1 block">Scholarly Insight</span>
                           <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                             {currentDisplayDua.short_explanation}
                           </p>
                         </div>
                       )}
 
-                      {/* Masnoon Dua */}
                       {currentDisplayDua.masnoon_dua_arabic && (
-                        <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-xl text-white shadow-md">
-                          <div className="flex items-center gap-2 mb-3">
-                            <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-sm font-bold uppercase tracking-wider text-emerald-100">Recommended Masnoon Dua</span>
+                        <div className="p-5 bg-gradient-to-br from-emerald-700 to-teal-800 rounded-2xl text-white shadow-xl">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="bg-emerald-500/30 p-1.5 rounded-lg">
+                              <svg className="w-5 h-5 text-emerald-100" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-widest text-emerald-100">Recommended Sunnah Dua</span>
                           </div>
-                          <p className="text-xl sm:text-2xl font-bold mb-3 text-right leading-loose" dir="rtl">
+                          <p className="text-xl sm:text-2xl font-bold mb-4 text-right leading-loose font-arabic" dir="rtl">
                             {currentDisplayDua.masnoon_dua_arabic}
                           </p>
-                          <div className="pt-3 border-t border-white/20">
-                            <p className="text-sm sm:text-base italic opacity-90">
+                          <div className="pt-4 border-t border-white/20">
+                            <p className="text-sm sm:text-base italic text-emerald-50 leading-relaxed">
                               "{currentDisplayDua.masnoon_dua_english}"
                             </p>
                           </div>
-                        </div>
-                      )}
-
-                      {selectedHistoryItem && (
-                        <div className="p-3 sm:p-4 bg-gray-50/50 rounded-lg border-l-4 border-gray-400">
-                          <p className="text-sm text-gray-700">
-                            <span className="font-medium">Your feeling was:</span> {selectedHistoryItem.emotion}
-                          </p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            {formatDate(selectedHistoryItem.createdAt)}
-                          </p>
                         </div>
                       )}
                     </div>
@@ -539,21 +518,10 @@ const Home = () => {
                 )}
 
                 {!user && (
-                  <div className="text-center pt-4 sm:pt-6 border-t border-emerald-100">
-                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 sm:p-6 rounded-xl border border-emerald-100">
-                      <svg className="w-8 h-8 text-emerald-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 font-medium">
-                        Want a more personalized experience with history?
-                      </p>
-                      <Link
-                        to={"/login"}
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
+                  <div className="text-center pt-6 border-t border-emerald-100">
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-100">
+                      <p className="text-gray-600 mb-4 font-medium">Save your journey and see your history.</p>
+                      <Link to={"/login"} className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl">
                         Login for Personalization
                       </Link>
                     </div>
@@ -563,22 +531,15 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Enhanced Footer */}
           <footer className="text-center mt-12 sm:mt-16 px-4">
-            <div className="max-w-md mx-auto">
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-emerald-100/50 shadow-lg">
-                <p className="text-gray-600 mb-2 sm:mb-3 font-medium text-sm sm:text-base">
-                  May Allah guide and bless you
-                </p>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-6 sm:w-8 h-0.5 bg-gradient-to-r from-transparent to-emerald-400"></div>
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <div className="w-6 sm:w-8 h-0.5 bg-gradient-to-l from-transparent to-teal-400"></div>
-                </div>
-                <p className="text-xs sm:text-sm text-gray-500 italic">
-                  "And it is He who created the heavens and earth in truth. And the day He says, 'Be,' and it is, His word is the truth."
-                </p>
+            <div className="max-w-md mx-auto bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-emerald-100/30">
+              <p className="text-gray-600 mb-2 font-medium">May Allah grant you Hidayah</p>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-8 h-0.5 bg-emerald-200"></div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <div className="w-8 h-0.5 bg-emerald-200"></div>
               </div>
+              <p className="text-xs text-gray-400 italic">"Verily, with hardship comes ease." (94:6)</p>
             </div>
           </footer>
         </div>
