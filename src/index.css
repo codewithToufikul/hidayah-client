@@ -1,15 +1,56 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-arabic {
-  font-family: 'Amiri', serif;
+  font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
 }
 
 .font-outfit {
   font-family: 'Outfit', sans-serif;
+}
+
+/* Hide scrollbar for clean horizontal carousel navigation */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area insets for iPhone notch and home indicator */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Subtle spiritual background glow */
+.spiritual-bg {
+  background-color: #F8FAF9;
+  background-image: 
+    radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.07) 0px, transparent 50%),
+    radial-gradient(at 90% 15%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(5, 150, 105, 0.06) 0px, transparent 50%);
+}
+
+/* Islamic Geometric Pattern Subtle Overlay */
+.islamic-lattice {
+  background-image: radial-gradient(#059669 0.75px, transparent 0.75px), radial-gradient(#059669 0.75px, #F8FAF9 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  opacity: 0.18;
+}
+
+/* Smooth tap transitions */
+button, a {
+  -webkit-tap-highlight-color: transparent;
 }
