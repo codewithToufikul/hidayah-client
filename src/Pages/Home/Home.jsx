@@ -279,11 +279,12 @@ ${currentDisplayDua.masnoon_dua_arabic}
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: "#ffffff",
+        logging: false,
       });
 
       const link = document.createElement("a");
-      link.download = `hidayah - dua - ${currentDisplayDua?.surah_name || "verse"}.png`;
+      link.download = `hidayah-dua-${currentDisplayDua?.surah_name || "verse"}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
       toast.success("Image card downloaded!");
@@ -899,49 +900,168 @@ ${currentDisplayDua.masnoon_dua_arabic}
               </div>
 
               {/* Hidden Canvas Template for High-Resolution Export */}
-              <div className="fixed -left-[9999px] top-0">
+              <div style={{ position: "fixed", left: "-9999px", top: 0, opacity: 1, pointerEvents: "none" }}>
                 <div
                   ref={cardRef}
-                  className="w-[600px] p-10 bg-white border-8 border-emerald-900 text-slate-900 relative"
-                  style={{ minHeight: "800px" }}
+                  data-export-card="true"
+                  style={{
+                    width: "600px",
+                    minHeight: "750px",
+                    padding: "40px",
+                    backgroundColor: "#ffffff",
+                    border: "8px solid #064e3b",
+                    color: "#0f172a",
+                    position: "relative",
+                    fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+                    boxSizing: "border-box"
+                  }}
                 >
-                  <div className="text-center mb-6">
-                    <p className="font-arabic text-amber-700 text-2xl font-bold mb-2" dir="rtl">
+                  <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                    <p
+                      className="font-arabic"
+                      style={{
+                        color: "#b45309",
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        marginBottom: "8px",
+                        direction: "rtl"
+                      }}
+                    >
                       بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                     </p>
-                    <h3 className="font-outfit text-3xl font-black text-emerald-900 tracking-wider">
+                    <h3
+                      className="font-outfit"
+                      style={{
+                        fontSize: "28px",
+                        fontWeight: "900",
+                        color: "#064e3b",
+                        letterSpacing: "0.05em",
+                        margin: 0
+                      }}
+                    >
                       HIDAYAH · هِـدَايَة
                     </h3>
-                    <p className="text-xs uppercase tracking-widest text-emerald-700 font-bold">
+                    <p
+                      style={{
+                        fontSize: "11px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.15em",
+                        color: "#047857",
+                        fontWeight: "bold",
+                        marginTop: "4px"
+                      }}
+                    >
                       Personalized Quranic Guidance
                     </p>
                   </div>
 
-                  <div className="p-6 bg-emerald-50/80 rounded-2xl border border-emerald-200 mb-6">
-                    <p className="font-arabic text-2xl text-emerald-950 font-bold text-right leading-loose mb-3" dir="rtl">
+                  <div
+                    style={{
+                      padding: "24px",
+                      backgroundColor: "#f0fdf4",
+                      borderRadius: "16px",
+                      border: "1px solid #bbf7d0",
+                      marginBottom: "20px"
+                    }}
+                  >
+                    <p
+                      className="font-arabic"
+                      style={{
+                        fontSize: "24px",
+                        color: "#022c22",
+                        fontWeight: "bold",
+                        textAlign: "right",
+                        lineHeight: 2.2,
+                        marginBottom: "12px",
+                        direction: "rtl"
+                      }}
+                    >
                       {currentDisplayDua.arabic}
                     </p>
-                    <p className="text-sm italic text-slate-800">
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontStyle: "italic",
+                        color: "#1e293b",
+                        lineHeight: 1.6,
+                        margin: 0
+                      }}
+                    >
                       "{currentDisplayDua.translation}"
                     </p>
-                    <p className="text-xs font-bold text-emerald-800 mt-2">
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: "#065f46",
+                        marginTop: "10px",
+                        marginBottom: 0
+                      }}
+                    >
                       Surah {currentDisplayDua.surah_name} ({currentDisplayDua.surah_number}:{currentDisplayDua.ayah_number})
                     </p>
                   </div>
 
                   {currentDisplayDua.masnoon_dua_arabic && (
-                    <div className="p-6 bg-emerald-900 text-white rounded-2xl mb-6">
-                      <p className="text-xs uppercase font-bold text-amber-300 mb-2">Sunnah Masnoon Dua</p>
-                      <p className="font-arabic text-xl font-bold text-right mb-2 leading-loose" dir="rtl">
+                    <div
+                      style={{
+                        padding: "24px",
+                        backgroundColor: "#064e3b",
+                        color: "#ffffff",
+                        borderRadius: "16px",
+                        marginBottom: "20px"
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: "11px",
+                          textTransform: "uppercase",
+                          fontWeight: "bold",
+                          color: "#fde68a",
+                          marginBottom: "8px",
+                          letterSpacing: "0.1em"
+                        }}
+                      >
+                        Sunnah Masnoon Dua · دعاء مأثور
+                      </p>
+                      <p
+                        className="font-arabic"
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                          marginBottom: "8px",
+                          lineHeight: 2,
+                          direction: "rtl",
+                          color: "#ffffff"
+                        }}
+                      >
                         {currentDisplayDua.masnoon_dua_arabic}
                       </p>
-                      <p className="text-xs text-emerald-100 italic">
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: "#d1fae5",
+                          fontStyle: "italic",
+                          lineHeight: 1.5,
+                          margin: 0
+                        }}
+                      >
                         "{currentDisplayDua.masnoon_dua_english}"
                       </p>
                     </div>
                   )}
 
-                  <div className="text-center pt-4 border-t border-emerald-100 text-[11px] text-gray-500 font-semibold">
+                  <div
+                    style={{
+                      textAlign: "center",
+                      paddingTop: "16px",
+                      borderTop: "1px solid #d1fae5",
+                      fontSize: "11px",
+                      color: "#64748b",
+                      fontWeight: "600"
+                    }}
+                  >
                     Generated via Hidayah AI Emotional Intelligence
                   </div>
                 </div>
