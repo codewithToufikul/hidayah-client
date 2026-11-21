@@ -138,19 +138,28 @@ const Home = () => {
 
   // 🎙️ Speech Recognition (Web Speech API)
   const toggleListening = () => {
+    toast.dismiss();
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       toast.error(
-        "Voice speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari."
+        speechLang === "ar-SA"
+          ? "التعرف على الصوت غير مدعوم في هذا المتصفح. يرجى استخدام متصفح Chrome أو Safari أو كتابة حالتك."
+          : "Voice speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.",
+        { id: "voice-toast", duration: 4000 }
       );
       return;
     }
 
     if (isListening) {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.error(e);
+        }
       }
       setIsListening(false);
       return;
@@ -167,7 +176,8 @@ const Home = () => {
         toast.success(
           speechLang === "ar-SA"
             ? "جاري الاستماع... تحدث الآن باللغة العربية"
-            : "Listening... Speak your feelings now"
+            : "Listening... Speak your feelings now",
+          { id: "voice-toast", duration: 3000 }
         );
       };
 
@@ -182,12 +192,45 @@ const Home = () => {
       };
 
       recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
+        console.warn("Speech recognition error:", event.error);
         setIsListening(false);
-        if (event.error === "not-allowed") {
-          toast.error("Microphone access was denied. Please allow microphone permissions in your browser.");
-        } else if (event.error !== "no-speech") {
-          toast.error(`Speech recognition error: ${event.error}`);
+        toast.dismiss();
+
+        if (event.error === "not-allowed" || event.error === "permission-denied") {
+          toast.error(
+            speechLang === "ar-SA"
+              ? "تم حظر إذن الميكروفون. يرجى السماح بصلاحية الميكروفون في إعدادات المتصفح."
+              : "Microphone access denied. Please allow microphone permissions in your browser.",
+            { id: "voice-toast", duration: 4500 }
+          );
+        } else if (event.error === "service-not-allowed" || event.error === "network") {
+          toast.error(
+            speechLang === "ar-SA"
+              ? "خدمة الصوت تتطلب اتصالاً نشطاً بالإنترنت. يمكنك كتابة مشاعرك أو اختيار بطاقة الحالة أدناه."
+              : "Voice service requires an active internet connection. You can also type or choose an emotion badge below.",
+            { id: "voice-toast", duration: 5000 }
+          );
+        } else if (event.error === "audio-capture") {
+          toast.error(
+            speechLang === "ar-SA"
+              ? "لم يتم العثور على ميكروفون صالح في جهازك."
+              : "No working microphone detected. Please check your audio hardware.",
+            { id: "voice-toast", duration: 4000 }
+          );
+        } else if (event.error === "no-speech") {
+          toast(
+            speechLang === "ar-SA"
+              ? "لم يتم سماع صوت. يمكنك المحاولة مجدداً أو كتابة حالتك."
+              : "No speech detected. Please speak closer to the mic or type below.",
+            { id: "voice-toast", icon: "🎙️", duration: 3500 }
+          );
+        } else if (event.error !== "aborted") {
+          toast.error(
+            speechLang === "ar-SA"
+              ? "تعذر التعرف على الصوت. يمكنك كتابة حالتك أو اختيار أحد المشاعر أدناه."
+              : "Voice recognition unavailable. Please type your feeling or select an emotion badge below.",
+            { id: "voice-toast", duration: 4000 }
+          );
         }
       };
 
@@ -200,7 +243,13 @@ const Home = () => {
     } catch (err) {
       console.error("Failed to start speech recognition:", err);
       setIsListening(false);
-      toast.error("Could not activate microphone.");
+      toast.dismiss();
+      toast.error(
+        speechLang === "ar-SA"
+          ? "تعذر تشغيل الميكروفون. يمكنك كتابة مشاعرك مباشرة."
+          : "Could not activate microphone. You can type your feelings directly.",
+        { id: "voice-toast", duration: 4000 }
+      );
     }
   };
 
